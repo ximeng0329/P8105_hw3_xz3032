@@ -1,0 +1,35 @@
+---
+title: "P8105_hw3_xz3032"
+output: github_document
+---
+
+## Load Package and data
+```{r}
+library(tidyverse)
+library(ggridges)
+```
+
+## Problem 1
+Load Data
+```{r}
+library(p8105.datasets)
+data("instacart")
+```
+
+How many aisles? and which are most items ordered from?
+```{r}
+instacart %>%
+  count(aisle) %>%
+  arrange(desc(n))
+```
+
+Make a plot that shows the number of items ordered in each aisle, limiting this to aisles with more than 10000 items ordered. 
+```{r}
+instacart %>%
+  count(aisle) %>%
+  filter(n > 10000) %>%
+  ggplot(aes(x = aisle, y = n)) + geom_point() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+
