@@ -82,7 +82,7 @@ accel_df2 = accel_df %>%
     day = factor(day, levels = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
   )
 ```
-Short Description: The dataset is about a CHF patients' daily "activity count" data.  Data were collected each minute of a 24-hour day starting at midnight for 5 weeks, it contains `r ncol(accel_df)` variables, they are `r names(accel_df)` and the dataset has a total of 1440*35 observations.  
+Short Description: The dataset is about a CHF patients' daily "activity count" data.  Data were collected each minute of a 24-hour day starting at midnight for 5 weeks, it contains `r ncol(accel_df2)` variables, they are `r names(accel_df2)` and the dataset has a total of 1440*35 observations.  
 
 Aggregate accross minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
 ```{r}
@@ -95,7 +95,7 @@ accel_df2 %>%
 Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph.
 ```{r}
 accel_df2 %>%
-  ggplot(aes(x = mintes_in_the_d, y = activity_count, color = day)) + geom_point(alpha = 0.5) + geom_line(alpha = 0.5)
+  ggplot(aes(x = mintes_in_the_d, y = activity_count, color = day)) + geom_point(alpha = 0.5) + geom_line(alpha = 0.5) + labs(x = "mintes of day", y = "activity count", title = "activity acount per minute over 5 week")
 ```
 The plot is not smooth and steady, the patient's activity is often intense for a period of time and then followed by a period of low-intense activity.  There are some outliers which the activity count in a minutes is over 7000.  
 
@@ -112,11 +112,11 @@ Do some data cleaning. Create separate variables for year, month, and day.
 noaa_df = ny_noaa %>% 
   separate(date, into = c("year", "month", "day"), convert = TRUE) %>%
   mutate(
-  tmax = 10 * as.numeric(tmax), 
-  tmin = 10 * as.numeric(tmin),
-  prcp = 10 * prcp)
+  tmax = as.numeric(tmax), 
+  tmin = as.numeric(tmin),
+  prcp = prcp)
 ```
-snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?
+snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why? (0, most of days have no snow)
 ```{r}
 noaa_df %>%
   drop_na(snow) %>%
@@ -127,25 +127,24 @@ noaa_df %>%
 Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
 ```{r}
 noaa_df %>%
-  filter(month == 1 & 7) %>%
+  filter(month == 3 & 7) %>%
   group_by(id, year, month) %>%
   summarize(mean_tmax = mean(tmax, na.rm = TRUE)) %>%
-  ggplot(aes(x = year, y = mean_tmax, group = id, color = id)) + geom_point() + geom_path()
+  ggplot(aes(x = year, y = mean_tmax, group = id, color = id)) + geom_point(alpha = 0.5) + labs(x = "year", y = "average maximum temperature", title = "average max temperature in Jan and Jul across year each station") + theme(legend.position = "none")
 ```
-
+Average maximum temperature tend to follow a z shape patten, it flatuate across years but mostly stay in a range between 0-125
     
 Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
 ```{r}
+library(patchwork)
 plot1 = noaa_df %>%
-  drop_na(tmax) %>%
-  drop_na(tmin) %>%
-  ggplot(aes(x = tmin, y = tmax), color = year) + geom_line(alpha = 0.5)
+  ggplot(aes(x = tmin, y = tmax)) + geom_smooth(alpha = 0.5) + labs(x = "minimum temperature", y = "maximum temperature", title = "maximum vs minimum temperature") + theme(legend.position = "none")
 
 plot2 = noaa_df %>% 
-  filter(snow > 0 & snow < 100) %>%
-  ggplot(aes(x = year, y = snow), color = year) + geom_point()
+  filter(snow > 0 & snow < 100 ) %>%
+  ggplot(aes(x = year, y = snow), color = year) + geom_smooth(alpha = 0.3) + labs(x = "year", y = "snowfall", title = "snowfall distribution") + theme(legend.position = "none")
 
-plot1 + plot2
+plot1 / plot2
 ```
 
 
