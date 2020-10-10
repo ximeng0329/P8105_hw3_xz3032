@@ -28,8 +28,108 @@ Make a plot that shows the number of items ordered in each aisle, limiting this 
 instacart %>%
   count(aisle) %>%
   filter(n > 10000) %>%
+  mutate(
+    aisle = as.factor(aisle),
+    aisle = fct_reorder(aisle, n)
+  ) %>%
   ggplot(aes(x = aisle, y = n)) + geom_point() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
 
+Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.
+```{r}
+instacart %>%
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>%
+  group_by(aisle) %>%
+  count(product_name) %>%
+  mutate(rank = min_rank(desc(n))) %>%
+  filter(rank < 4) %>%
+  arrange(rank) %>%
+  knitr::kable()
+```
 
+Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week.
+```{r}
+instacart %>%
+  filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>%
+  group_by(product_name, order_dow) %>%
+  summarize(mean_hour = mean(order_hour_of_day)) %>%
+  pivot_wider(
+    names_from = order_dow,
+    values_from = mean_hour
+  )
+```
+
+## Problem 2
+Load, tidy, and otherwise wrangle the data. include a weekday vs weekend variable; and encode data with reasonable variable classes. Describe the resulting dataset (e.g. what variables exist, how many observations, etc).
+```{r}
+accel_df = read_csv("./data/accel_data.csv")
+
+accel_df2 = accel_df %>%
+  janitor::clean_names() %>%
+  pivot_longer(
+    activity.1:activity.1440,
+    names_to = "mintes_in_the_d",
+    values_to = "activity_count"
+  ) %>%
+  mutate(
+    weekday = case_when(
+      day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday") ~ "YES",
+      day %in% c("Saturday", "Sunday") ~ "NO",
+      TRUE ~ ""
+  )) %>%
+  mutate(
+    day = as.factor(day),
+    day = factor(day, levels = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+  )
+```
+Short Description: The dataset is about a CHF patients' daily "activity count" data.  Data were collected each minute of a 24-hour day starting at midnight for 5 weeks, it contains `r ncol(accel_df)` variables, they are `r names(accel_df)` and the dataset has a total of 1440*35 observations.  
+
+Aggregate accross minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
+```{r}
+accel_df2 %>%
+  group_by(week, day) %>%
+  summarise(total_daily_activity = sum(activity_count)) %>%
+  knitr::kable()
+```
+
+Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph.
+```{r}
+accel_df2 %>%
+  ggplot(aes(x = mintes_in_the_d, y = activity_count, color = day)) + geom_point(alpha = 0.5) + geom_line(alpha = 0.5)
+```
+
+
+## Problem 
+
+Load data set
+```{r}
+library(p8105.datasets)
+data("ny_noaa")
+```
+
+Do some data cleaning. Create separate variables for year, month, and day. 
+```{r}
+noaa_df = ny_noaa %>% 
+  separate(date, into = c("year", "month", "day")) %>%
+  mutate(
+    year = as.integer(year),
+    month = as.integer(month),
+    day = as.integer(day),
+  tmax = as.numeric(10 * tmax), 
+  tmin = as.numeric(10 * tmin),
+  prcp = 10 * prcp) 
+```
+
+snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?
+```{r}
+noaa_df %>%
+  drop_na(snow) %>%
+  count(snow) %>%
+  arrange(desc(n))
+```
+  
+
+  
+
+  
