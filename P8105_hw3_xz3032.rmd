@@ -66,7 +66,6 @@ Load, tidy, and otherwise wrangle the data. include a weekday vs weekend variabl
 accel_df = read_csv("./data/accel_data.csv")
 
 accel_df2 = accel_df %>%
-  janitor::clean_names() %>%
   pivot_longer(
     activity.1:activity.1440,
     names_to = "mintes_in_the_d",
@@ -98,7 +97,7 @@ Accelerometer data allows the inspection activity over the course of the day. Ma
 accel_df2 %>%
   ggplot(aes(x = mintes_in_the_d, y = activity_count, color = day)) + geom_point(alpha = 0.5) + geom_line(alpha = 0.5)
 ```
-
+The plot is not smooth and steady, the patient's activity is often intense for a period of time and then followed by a period of low-intense activity.  There are some outliers which the activity count in a minutes is over 7000.  
 
 ## Problem 
 
@@ -128,22 +127,28 @@ noaa_df %>%
 Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
 ```{r}
 noaa_df %>%
-  filter(month %in% c("01","07")) %>%
+  filter(month == 1 & 7) %>%
   group_by(id, year, month) %>%
   summarize(mean_tmax = mean(tmax, na.rm = TRUE)) %>%
-  ggplot(aes(x = year, y = mean_tmax, group = id, color = id)) + geom_point() 
+  ggplot(aes(x = year, y = mean_tmax, group = id, color = id)) + geom_point() + geom_path()
 ```
+
     
 Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
 ```{r}
-noaa_df %>%
+plot1 = noaa_df %>%
   drop_na(tmax) %>%
   drop_na(tmin) %>%
   ggplot(aes(x = tmin, y = tmax), color = year) + geom_line(alpha = 0.5)
 
-noaa_df %>% 
+plot2 = noaa_df %>% 
   filter(snow > 0 & snow < 100) %>%
   ggplot(aes(x = year, y = snow), color = year) + geom_point()
+
+plot1 + plot2
+```
+
+
   
 
   
