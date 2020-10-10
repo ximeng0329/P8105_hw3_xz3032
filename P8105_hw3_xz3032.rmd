@@ -116,11 +116,10 @@ noaa_df = ny_noaa %>%
     year = as.integer(year),
     month = as.integer(month),
     day = as.integer(day),
-  tmax = as.numeric(10 * tmax), 
-  tmin = as.numeric(10 * tmin),
+  tmax = 10 * as.integer(tmax), 
+  tmin = 10 * as.integer(tmin),
   prcp = 10 * prcp) 
 ```
-
 snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?
 ```{r}
 noaa_df %>%
@@ -129,7 +128,18 @@ noaa_df %>%
   arrange(desc(n))
 ```
   
-
+Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
+```{r}
+noaa_df %>%
+  filter(month == 1 & 7) %>%
+  group_by(id, year, month) %>%
+  summarize(mean_tmax = mean(tmax, na.rm = TRUE)) %>%
+  ggplot(aes(x = year, y = mean_tmax, group = id, color = id)) + geom_point()
+```
+    
+Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
+  
+  
   
 
   
